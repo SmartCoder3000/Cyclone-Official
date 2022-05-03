@@ -1,0 +1,82 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="/assets/css/style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <div class="context">
+      <header>
+        <div class="navbar">
+          <div class="navitem">
+            <a href="/">Home</a>
+          </div>
+          <div class="navitem" style="float: center;">
+            <a href="/unblock">Unblock</a>
+          </div>
+          <div class="navitem">
+            <a href="/games">Games</a>
+          </div>
+          
+          <div class="navitem" style="float: right;">
+            <a href="discord.gg/AmongUs">Discord</a>
+          </div>
+          
+          <div class="navitem" style="float: right;">
+            <a href="/appearance"> Settings </a>
+          </div>
+        </div>
+      </header>
+      
+        <select id="appearance" style="color:black;">
+          <option value="default">Select</option>
+          <option value="default">Default</option>
+          <option value="space">Space</option>
+          <option value="dark">Dark</option>
+          <option value="resilience">Resilience</option>
+          <option value="hackerman">Terminal</option>
+          <option value="beast">Beast</option>
+          <option value="sleepy">Fancy</option>
+          <option value="incognito">Incognito</option>
+        </select>
+
+    </div>
+    <div class="area">
+      <ul class="circles">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+      </ul>
+    </div>
+    <script>
+    function init(){
+      try{
+      var element = document.getElementById('appearance')
+      
+      element.addEventListener("change", (e) => {
+        const value = e.target.value;
+        const text = element.options[element.selectedIndex].text;
+
+        if (value) {
+          document.cookie = "appearance="+value
+          location.href = "/"
+        } else {
+          
+        }
+      }); 
+      
+      } catch (e) {
+        window.alert(e)
+      }
+    }
+    init()
+    </script>
+    <script src="/assets/js/script.js"></script>
+  </body>
+</html>
