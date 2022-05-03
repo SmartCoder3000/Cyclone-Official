@@ -92,6 +92,8 @@ class Rewriting {
 			let action = tag.getAttribute('action')
 			let srcset = tag.getAttribute('srcset')
 			//Rewriting & Setting Of Attributes
+
+			tag.removeAttribute("integrity")
 			
 			if (href){
 				href = this.rewriteUrl(href)
@@ -115,6 +117,14 @@ class Rewriting {
 					script = this.rewriteJS(script)
 					tag.text = script
 				}
+			}
+			if (type === "iframe"){
+				var content = (tag.contentWindow || tag.contentDocument)
+				var head = content.document.head.innerHTML
+				var body = content.document.body.innerHTML
+				var html = head+body
+
+				this.rewriteDoc(html)
 			}
 			
 			this.rewriteCSS(tag)

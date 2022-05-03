@@ -1,7 +1,8 @@
-let pth = location.href.split(location.origin)[1]
-let dloc = pth.substr(pth.indexOf("/", pth.indexOf("/") + 1)+1,pth.length)
+var _path_ = location.href.split(location.origin)[1]
+var dloc = _path_.substr(_path_.indexOf("/", _path_.indexOf("/") + 1)+1,_path_.length)
 
-const PREFIX = pth.substr(0,pth.indexOf("/", pth.indexOf("/") + 1)+1)
+const PREFIX = _path_.substr(0,_path_.indexOf("/", _path_.indexOf("/") + 1)+1)
+
 try {
 	var URLMAP = new URL(dloc)
 } catch {
@@ -16,6 +17,7 @@ class Rewriting {
 			this.url = new URL('https://'+url)
 		}
 		this.prefix = PREFIX+'/'
+		this.prefix = this.prefix.replace('//','')
   }
 	
 	rewriteUrl(url){
@@ -53,7 +55,8 @@ class Rewriting {
 			let attrs = {
 				"href": tag.getAttribute('href'),
 				"src": tag.getAttribute('src'),
-				"action": tag.getAttribute('action'),
+				"action": tag.getAttribute('action'), 
+				"integ": tag.getAttribute('integrity')
 			}
 			let checked = tag.getAttribute("checked")
 
@@ -79,6 +82,9 @@ class Rewriting {
 				}
 				tag.setAttribute('checked','true')
 			}
+			if (attrs.integ){
+				tag.removeAttribute('integrity')
+			}
 		}
 	}
 }
@@ -90,7 +96,14 @@ function update(){
 
 window.setInterval(function(){
 	update()
-},1000)
+},100)
+
+const open = XMLHttpRequest.prototype.open;
+XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+  var rewrite = new Rewriting(dloc)
+	url = rewrite.rewriteUrl(url)
+  return open.call(this, method, url, ...rest);
+};
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/assets/js/sw.js',{
