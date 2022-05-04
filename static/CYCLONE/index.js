@@ -95,7 +95,7 @@ class Rewriting {
 
 			tag.removeAttribute("integrity")
 			
-			if (href){
+			/*if (href){
 				href = this.rewriteUrl(href)
 				tag.setAttribute("href",href)
 			}
@@ -125,7 +125,7 @@ class Rewriting {
 				var html = head+body
 
 				this.rewriteDoc(html)
-			}
+			}*/
 			
 			this.rewriteCSS(tag)
 			tag.setAttribute("checked",'false')
@@ -155,10 +155,11 @@ async function request(req,res,next){
 		uri = uri.replace('http://','')
 		uri = uri.replace('http://','')
 		uri = uri.replace('https:/','')
-		uri = uri.replace('https:/','')
+		uri = uri.replace('http:/','')
 		uri = uri.replace('//','')
 		uri = 'https://'+uri
 
+		
 		//Make A Fetch Request
 		
 		//Set Headers

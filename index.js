@@ -34,4 +34,6 @@ app.get('*',function(req,res){
 	res.sendFile(__dirname+'/views/404.html')
 })
 
-app.listen()
+app.listen(8080, '0.0.0.0',function(){
+	console.log("App Listening On 8080")
+})
