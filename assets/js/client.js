@@ -20,7 +20,6 @@ try{
 			this.prefix = PREFIX+'/'
 			this.prefix = this.prefix.replace('//','')
 	  }
-		
 		rewriteUrl(url){
 			let rewritten;
 	
@@ -44,7 +43,18 @@ try{
 				return url
 			}
 		}
-		
+	 
+		rewriteSrcset(sample) {
+			return sample.split(',').map(e => {
+				return (e.split(' ').map(a => {
+					if (a.startsWith('http') || (a.startsWith('/') && !a.startsWith(this.prefix))) {
+						var url = this.rewriteUrl(a)
+					}
+					return a.replace(a, (url || a))
+				}).join(' '))
+			}).join(',')
+		}
+	 
 		rewriteDoc(){
 			//Main Rewriting
 			let tags = document.querySelectorAll('*')
@@ -68,7 +78,7 @@ try{
 						tag.setAttribute("href",href)
 					}
 					if (srcset){
-						srcset = this.rewriteUrl(srcset)
+						srcset = this.rewriteSrcset(srcset)
 						tag.setAttribute("srcset",srcset)
 					}
 					if (src){
@@ -76,7 +86,7 @@ try{
 						tag.setAttribute("src",src)
 					}
 					if (action){
-						href = this.rewriteUrl(action)
+						action = this.rewriteUrl(action)
 						tag.setAttribute("action",action)
 					}
 					if (type === "script"){

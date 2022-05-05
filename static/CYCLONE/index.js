@@ -75,7 +75,18 @@ class Rewriting {
 			tag.style[name] = url
 		}
 	}
-
+	
+	rewriteSrcset(sample) {
+		return sample.split(',').map(e => {
+			return (e.split(' ').map(a => {
+				if (a.startsWith('http') || (a.startsWith('/') && !a.startsWith(this.prefix))) {
+					var url = this.rewriteUrl(a)
+				}
+				return a.replace(a, (url || a))
+			}).join(' '))
+		}).join(',')
+	}
+	
 	rewriteDoc(html) {
 		this.dom = new JSDOM(html)
 		this.document = this.dom.window.document
@@ -102,7 +113,7 @@ class Rewriting {
 				tag.setAttribute("href", href)
 			}
 			if (srcset) {
-				srcset = this.rewriteUrl(srcset)
+				srcset = this.rewriteSrcset(srcset)
 				tag.setAttribute("srcset", srcset)
 			}
 			if (src) {
@@ -110,7 +121,7 @@ class Rewriting {
 				tag.setAttribute("src", src)
 			}
 			if (action) {
-				href = this.rewriteUrl(action)
+				action = this.rewriteUrl(action)
 				tag.setAttribute("action", action)
 			}
 
