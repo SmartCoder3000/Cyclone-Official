@@ -131,15 +131,7 @@ class Rewriting {
 					script = this.rewriteJS(script)
 					tag.text = script
 				}
-			}
-
-			if (type === "iframe") {
-				if (!src) {
-					var content = (tag.contentWindow || tag.contentDocument);
-					if (content.document) content = content.document;
-					content.write(this.rewriteDoc(content))
-					content.close()
-				}
+				tag.removeAttribute('async')
 			}
 
 			this.rewriteCSS(tag)

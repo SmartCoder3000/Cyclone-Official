@@ -89,24 +89,26 @@ try{
 						action = this.rewriteUrl(action)
 						tag.setAttribute("action",action)
 					}
+					
 					if (type === "script"){
 						if (!src){
 							let script = tag.text
 							script = this.rewriteJS(script)
 							tag.text = script
 						}
+						tag.removeAttribute('async')
 					}
-				  // you dont need that
+
 					this.rewriteCSS(tag)
-					tag.setAttribute("checked",'true')
 				}
+				tag.setAttribute("checked",'true')
 			}
 			
 		}
 		
 		rewriteiFrame(iframe){
 			//Main Rewriting
-			var frameDoc = (iframe.contentWindow || iframe.contentDocument);
+			var frameDoc = (iframe.contentWindow || iframe.contentDocument || iframe.document);
 			let tags = frameDoc.querySelectorAll('*')
 			
 			for (var i = 0; i < tags.length; i++){
@@ -174,14 +176,20 @@ try{
     const response = await oldFetch(resource, config);
     return response;
 	};
+
+	const originBeacon = window.navigator.sendBeacon
+	window.navigator.sendBeacon = async function(...args){
+		var [origin, data] = args
+		origin = rewriter.rewriteUrl(origin)
+		return originBeacon(origin,data)
+	}
 	
   var CWOriginal = Object.getOwnPropertyDescriptor(window.HTMLIFrameElement.prototype, 'contentWindow')
 
   Object.defineProperty(window.HTMLIFrameElement.prototype, 'contentWindow', {
     get() {
       var iWindow = CWOriginal.get.call(this)
-			rewriter.rewriteIframe(iWindow)
-			rewriter.rewriteIframe(iWindow)
+			rewriter.rewriteiFrame(iWindow)
 			
 			return iWindow
     },
@@ -239,9 +247,9 @@ try{
 	  });
 	  return ws;
 	};
-	
+			
 	window.WebSocket = ProxiedWebSocket;
-	
+
 	//SW Work IN Progress
 	if ('serviceWorker' in navigator) {
 	  navigator.serviceWorker.register('/sw.js',{
