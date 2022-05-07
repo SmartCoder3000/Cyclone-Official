@@ -19,6 +19,9 @@ class Rewriting {
 	rewriteUrl(url) {
 		let rewritten;
 		if (url.startsWith('https://') || url.startsWith('http://') || url.startsWith('//')) {
+			if (url.startsWith('//')){
+				url = 'https:'+url
+			}
 			rewritten = url
 		} else {
 			if (url == "/") {
@@ -40,23 +43,6 @@ class Rewriting {
 		let styles = this.window.getComputedStyle(tag)
 		let _values = styles['_values']
 
-		/*
-		let i = 0;
-		Object.keys(_values).forEach(x => {
-			let prop = _values[x]
-			let key = Object.keys(_values)[i]
-	
-			if (prop.includes("url(")){
-				let start = prop.indexOf('url(')
-				let end = prop.lastIndexOf(')')
-
-				let url = prop.substr(start,end)
-				console.log(url)
-			}
-			i++
-		});
-		*/
-
 		let prop = styles.getPropertyValue('background-image')
 		let name = "background-image"
 
@@ -66,6 +52,7 @@ class Rewriting {
 				name = "background"
 			}
 		}
+		
 		if (prop.includes("url(")) {
 			let start = prop.indexOf('url(') + 4
 			let end = prop.indexOf(')') - 4
@@ -106,8 +93,6 @@ class Rewriting {
 			var srcset = tag.getAttribute('srcset')
 			//Rewriting & Setting Of Attributes
 
-			tag.removeAttribute("integrity")
-
 			if (href) {
 				href = this.rewriteUrl(href)
 				tag.setAttribute("href", href)
@@ -134,7 +119,21 @@ class Rewriting {
 				tag.removeAttribute('async')
 			}
 
+			//Setting Nonce and integ
+				let integrity = tag.getAttribute('integrity')
+				let nonce = tag.getAttribute('nonce')
+				
+				if (nonce) {
+					tag.removeAttribute('nonce')
+					tag.setAttribute('nonoce',nonce)
+				}
+				if (integrity) {
+					tag.removeAttribute('integrity')
+					tag.setAttribute('nointegrity',nonce)
+				}
+			
 			this.rewriteCSS(tag)
+			
 			tag.setAttribute("checked", 'false')
 		}
 		//Adding The Client Script
@@ -143,9 +142,9 @@ class Rewriting {
 		return this.dom.serialize()
 	}
 	rewriteJS(script) {
-		let js = script.replace('document.location', 'URLMAP')
-		js = script.replace('window.location', 'URLMAP')
-		js = script.replace('location', 'URLMAP')
+		let js = script.replace('document.location', 'dlocation')
+		js = script.replace('window.location', 'dlocation')
+		js = script.replace('location', 'dlocation')
 		return js
 	}
 }
@@ -173,7 +172,8 @@ async function request(req, res, next) {
 				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36"
 			}
 			let options = {
-				headers: headers
+				headers: headers,
+				method: req.method
 			}
 			try {
 				let resp = await fetch(uri, options)
@@ -204,8 +204,10 @@ async function request(req, res, next) {
 			} catch (e) {
 				var name = e.name
 				var message = e.message
-	
-				console.log({ e })
+
+				if (!name=="FetchError"){
+					console.log({ e })
+				}
 	
 				res.send(`<body style="background:white;"><h1>${name}</h1><a>${message}</a></body>`)
 			}

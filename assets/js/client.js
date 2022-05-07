@@ -5,9 +5,9 @@ try{
 	const PREFIX = _path_.substr(0,_path_.indexOf("/", _path_.indexOf("/") + 1)+1)
 	
 	try {
-		var URLMAP = new URL(dloc)
+		var dlocation = new URL(dloc)
 	} catch {
-		var URLMAP = new URL('https://'+dloc)
+		var dlocation = new URL('https://'+dloc)
 	}
 
  class Rewriting {
@@ -24,6 +24,9 @@ try{
 			let rewritten;
 	
 			if (url.startsWith('https://') || url.startsWith('http://') || url.startsWith('//') || url.startsWith('ws:') || url.startsWith('wss:')){
+				if (url.startsWith('//')){
+					url = 'https:'+url
+				}
 				rewritten = url
 			} else {
 				if (url == "/"){
@@ -44,6 +47,31 @@ try{
 			}
 		}
 	 
+	 	rewriteCSS(tag) {
+			let styles = this.window.getComputedStyle(tag)
+			let _values = styles['_values']
+			
+			let prop = styles.getPropertyValue('background-image')
+			let name = "background-image"
+
+			if (prop == "") {
+				if (!styles.getPropertyValue('background') == "") {
+					prop = styles.getPropertyValue('background')
+					name = "background"
+				}
+			}
+			
+			if (prop.includes("url(")) {
+				let start = prop.indexOf('url(') + 4
+				let end = prop.indexOf(')') - 4
+	
+				let url = prop.substr(start, end)
+				url = this.rewriteUrl(url)
+				console.log(name)
+				tag.style[name] = url
+			}
+		}
+	 
 		rewriteSrcset(sample) {
 			return sample.split(',').map(e => {
 				return (e.split(' ').map(a => {
@@ -54,7 +82,14 @@ try{
 				}).join(' '))
 			}).join(',')
 		}
-	 
+
+		 rewriteJS(script) {
+			let js = script.replace('document.location', 'dlocation')
+			js = script.replace('window.location', 'dlocation')
+			js = script.replace('location', 'dlocation')
+			return js
+		}
+
 		rewriteDoc(){
 			//Main Rewriting
 			let tags = document.querySelectorAll('*')
@@ -70,8 +105,7 @@ try{
 				let srcset = tag.getAttribute('srcset')
 				let checked = tag.getAttribute('checked')
 				//Rewriting & Setting Of Attributes
-	
-				tag.removeAttribute("integrity")
+
 				if (!checked == 'true'){
 					if (href){
 						href = this.rewriteUrl(href)
@@ -100,10 +134,23 @@ try{
 					}
 
 					this.rewriteCSS(tag)
+					console.log(tag.style.backgroundImage)
+					tag.setAttribute("checked",'true')
 				}
-				tag.setAttribute("checked",'true')
+
+				//Setting Nonce and integ
+				let integrity = tag.getAttribute('integrity')
+				let nonce = tag.getAttribute('nonce')
+				
+				if (nonce) {
+					tag.removeAttribute('nonce')
+					tag.setAttribute('nonoce',nonce)
+				}
+				if (integrity) {
+					tag.removeAttribute('integrity')
+					tag.setAttribute('nointegrity',nonce)
+				}
 			}
-			
 		}
 		
 		rewriteiFrame(iframe){
@@ -124,9 +171,12 @@ try{
 				//Rewriting & Setting Of Attributes
 	
 				tag.removeAttribute("integrity")
+				tag.removeAttribute("nonce")
+				
 				if (!checked == 'true'){
 					if (href){
 						href = this.rewriteUrl(href)
+						console.log(href)
 						tag.setAttribute("href",href)
 					}
 					if (srcset){
@@ -148,8 +198,20 @@ try{
 							tag.text = script
 						}
 					}
-				  // you dont need that
+					//Setting Nonce and integ
+				let integrity = tag.getAttribute('integrity')
+				let nonce = tag.getAttribute('nonce')
+				
+				if (nonce) {
+					tag.removeAttribute('nonce')
+					tag.setAttribute('nonoce',nonce)
+				}
+				if (integrity) {
+					tag.removeAttribute('integrity')
+					tag.setAttribute('nointegrity',nonce)
+				}
 					this.rewriteCSS(tag)
+
 					tag.setAttribute("checked",'true')
 				}
 			}
@@ -159,6 +221,8 @@ try{
 	const rewriter = new Rewriting(dloc)
 	
 	function update(){
+		//For Discord Support
+		
 		rewriter.rewriteDoc()
 	}
 
@@ -190,7 +254,7 @@ try{
     get() {
       var iWindow = CWOriginal.get.call(this)
 			rewriter.rewriteiFrame(iWindow)
-			
+
 			return iWindow
     },
     set() {
@@ -206,7 +270,7 @@ try{
       return;
 		} else {
 			url = rewriter.rewriteUrl(path)
-			console.log(path)
+
 			oPush.apply(this, [obj,title,url])
 		}
 	}
@@ -250,6 +314,27 @@ try{
 			
 	window.WebSocket = ProxiedWebSocket;
 
+	const nwtb = window.open
+	function openNewTab(url,target,features) {
+		url = rewriter.rewriteUrl(url)
+		nwtb(url,target,features)
+	}
+	window.open = openNewTab
+
+	const postmsg = window.postMessage;
+	function postMessage(message, targetOrigin, transfer) {
+		url = rewriter.rewriteUrl(url)
+		postmsg(url,targetOrigin,transfer)
+	}
+	window.postMessage = postmsg
+
+	window.HTMLElement.prototype.setAttribute = new Proxy(window.HTMLElement.prototype.setAttribute, {
+  apply(target, thisArg, [name, value]) {
+    return Reflect.apply(target, thisArg, [name, value])
+  }
+	})
+
+	
 	//SW Work IN Progress
 	if ('serviceWorker' in navigator) {
 	  navigator.serviceWorker.register('/sw.js',{

@@ -6,8 +6,18 @@ var filter = require('./static/CYCLONE/filter.js')
 var { Worker, isMainThread} = require('worker_threads')
 var ws = require('ws')
 var ExpressSocket = require('express-ws')
+var analytics = require('@enderkingj/analytics');
 
+//For the WebSocket proxy
 ExpressSocket(app)
+
+//Thanks To EnderKingJ For Analytics
+app.use((req, res, next) => {
+  if (analytics(req, res)==false) return next();
+  else {
+    
+  };
+})
 
 //Worker
 app.get(function(req,res,next){

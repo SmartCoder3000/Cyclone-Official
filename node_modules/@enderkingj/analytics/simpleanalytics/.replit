@@ -1,0 +1,2 @@
+run = "node example/index"
+language = "node"
