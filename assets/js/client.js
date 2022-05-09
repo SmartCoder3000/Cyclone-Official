@@ -9,8 +9,8 @@ try{
 	} catch {
 		var dlocation = new URL('https://'+dloc)
 	}
-
- class Rewriting {
+	
+  class Rewriting {
 	  constructor(url) {
 			try {
 				this.url = new URL(url)

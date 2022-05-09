@@ -31,7 +31,7 @@ class Rewriting {
 					rewritten = this.url.host + url
 				} else {
 					rewritten = this.url.host + "/" + url
-				}
+				}2
 			}
 		}
 
@@ -169,7 +169,7 @@ async function request(req, res, next) {
 	
 			//Set Headers
 			let headers = {
-				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36"
+				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:74.0) Gecko/20100101 Firefox/74.0"
 			}
 			let options = {
 				headers: headers,
@@ -205,10 +205,8 @@ async function request(req, res, next) {
 				var name = e.name
 				var message = e.message
 
-				if (!name=="FetchError"){
-					console.log({ e })
-				}
-	
+				console.log(`${name} For ${uri}\n${e}`)
+				
 				res.send(`<body style="background:white;"><h1>${name}</h1><a>${message}</a></body>`)
 			}
 		} else if (uri.startsWith('ws:/') | uri.startsWith('wss:/')){
