@@ -7,9 +7,15 @@ var { Worker, isMainThread} = require('worker_threads')
 var ws = require('ws')
 var ExpressSocket = require('express-ws')
 var analytics = require('@enderkingj/analytics');
+var cors = require('cors')
 
 //For the WebSocket proxy
 ExpressSocket(app)
+
+//CORS
+app.use(cors({
+  origin: '*'
+}));
 
 //Thanks To EnderKingJ For Analytics
 app.use((req, res, next) => {
@@ -21,7 +27,6 @@ app.use((req, res, next) => {
 
 //Worker
 app.get(function(req,res,next){
-	res.set('Service-Worker-Allowed','true')
 	if (req.originalUrl.startsWith('/service')){
 		next()
 	} else {
