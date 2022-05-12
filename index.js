@@ -8,31 +8,16 @@ var ws = require('ws')
 var ExpressSocket = require('express-ws')
 var analytics = require('@enderkingj/analytics');
 var cors = require('cors')
+var compression = require('compression');
 
 //For the WebSocket proxy
 ExpressSocket(app)
 
-//CORS
+//CORS and Compression
 app.use(cors({
   origin: '*'
 }));
-
-//Thanks To EnderKingJ For Analytics
-app.use((req, res, next) => {
-  if (analytics(req, res)==false) return next();
-  else {
-    
-  };
-})
-
-//Worker
-app.get(function(req,res,next){
-	if (req.originalUrl.startsWith('/service')){
-		next()
-	} else {
-		next()
-	}
-})
+app.use(compression())
 
 //Proxy And Filter
 app.use(filter.filter)
