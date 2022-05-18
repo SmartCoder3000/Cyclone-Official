@@ -9,6 +9,7 @@ var ExpressSocket = require('express-ws')
 var analytics = require('@enderkingj/analytics');
 var cors = require('cors')
 var compression = require('compression');
+var games = require('./static/compiler.js')
 
 //For the WebSocket proxy
 ExpressSocket(app)
@@ -17,6 +18,7 @@ ExpressSocket(app)
 app.use(cors({
   origin: '*'
 }));
+
 app.use(compression())
 
 //Proxy And Filter
@@ -45,6 +47,11 @@ app.get('/unblock',function(req,res){
 
 app.get('/assets/:type/:file',function(req,res){
 	res.sendFile(__dirname+'/assets/'+req.params.type+'/'+req.params.file)
+})
+
+//Games
+app.get('/assets/:type/:gname/:file',function(req,res){
+	res.sendFile(__dirname+'/assets/'+req.params.type+'/'+req.params.gname+'/'+req.params.file)
 })
 
 app.get('*',function(req,res){

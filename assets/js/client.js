@@ -39,8 +39,17 @@ try{
 					}
 				}
 		 	}
-	
-			if (!url.startsWith('data:')){
+
+			var exceptions = ['about:','mailto:','javascript:','data:','#']
+			let valid = true
+			
+			for (var i = 0; i < exceptions.length; i++){
+				if (url.startsWith(exceptions[i])){
+					valid = false
+				}
+			}
+			
+			if (valid){
 				return this.prefix + '/' + rewritten
 			} else {
 				return url
@@ -156,8 +165,9 @@ try{
 		rewriteiFrame(iframe){
 			//Main Rewriting
 			var frameDoc = (iframe.contentWindow || iframe.contentDocument || iframe.document);
-			let tags = frameDoc.querySelectorAll('*')
 			
+			let tags = frameDoc.querySelectorAll('*')
+
 			for (var i = 0; i < tags.length; i++){
 				var tag = tags[i]
 			
@@ -240,13 +250,6 @@ try{
     const response = await oldFetch(resource, config);
     return response;
 	};
-
-	const originBeacon = window.navigator.sendBeacon
-	window.navigator.sendBeacon = async function(...args){
-		var [origin, data] = args
-		origin = rewriter.rewriteUrl(origin)
-		return originBeacon(origin,data)
-	}
 	
   var CWOriginal = Object.getOwnPropertyDescriptor(window.HTMLIFrameElement.prototype, 'contentWindow')
 
@@ -334,23 +337,9 @@ try{
   }
 	})
 
-	
-	//SW Work IN Progress
-	if ('serviceWorker' in navigator) {
-	  navigator.serviceWorker.register('/sw.js',{
-			scope: PREFIX
-		})
-	  .then(function(registration) {
-	    console.log('Registration successful, scope is:', registration.scope);
-	  })
-	  .catch(function(error) {
-	    console.log('Service worker registration failed, error:', error);
-	  });
-	}
+	window.setInterval(function(){
+		update()
+	},100)
 } catch (e) {
 	window.alert({e})
 }
-
-window.setInterval(function(){
-	update()
-},100)

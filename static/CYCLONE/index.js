@@ -31,7 +31,7 @@ class Rewriting {
 					rewritten = this.url.host + url
 				} else {
 					rewritten = this.url.host + "/" + url
-				}2
+				}
 			}
 		}
 
@@ -182,7 +182,11 @@ async function request(req, res, next) {
 				let content = resp.headers.get('content-type') || 'application/javascript'
 	
 				if (!content.includes('image')) {
-					var doc = await resp.text()
+					if (!content.includes('video')){
+						var doc = await resp.text()
+					} else {
+						var blob = await resp.blob()
+					}
 				} else {
 					var buf = await resp.buffer()
 				}
@@ -194,10 +198,13 @@ async function request(req, res, next) {
 					html = rewriter.rewriteJS(doc)
 				} else if (content.includes('image')) {
 					html = buf
+				} else if (content.includes('video')) {
+					html = blob
 				} else {
 					html = doc
 				}
-	
+
+				console.log(content)
 				res.set('Content-Type', content)
 	
 				res.send(html)

@@ -41,7 +41,7 @@ function detectCatagory(link) {
 function filter(req, res, next) {
 	var url = req.originalUrl.split('/service')
 
-	res.set('Service-Worker-Allowed','true')
+	res.set('Service-Worker-Allowed','/service')
 	
 	if (url.length === 2) {
 		url = url[1]
