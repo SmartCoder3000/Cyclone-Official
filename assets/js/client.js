@@ -9,7 +9,10 @@ try{
 	} catch {
 		var dlocation = new URL('https://'+dloc)
 	}
-	
+
+  window.dlocation = dlocation
+	document.dlocation = dlocation
+  
   class Rewriting {
 	  constructor(url) {
 			try {
@@ -240,12 +243,14 @@ try{
 	const open = XMLHttpRequest.prototype.open;
 	XMLHttpRequest.prototype.open = function (method, url, ...rest) {
 		url = rewriter.rewriteUrl(url)
+    console.log(rest)
 	  return open.call(this, method, url, ...rest);
 	};
 
 	const oldFetch = window.fetch;
 	window.fetch = async (...args) => {
     let [resource, config ] = args;
+    console.log(config)
 		resource = rewriter.rewriteUrl(resource)
     const response = await oldFetch(resource, config);
     return response;
@@ -330,6 +335,13 @@ try{
 		postmsg(url,targetOrigin,transfer)
 	}
 	window.postMessage = postmsg
+
+  const eventsrc = window.postMessage;
+	function eventSourcePost(url, ...rest) {
+		url = rewriter.rewriteUrl(url)
+	  return eventsrc.call(this, method, url, ...rest);
+	};
+	window.EventSource = eventSourcePost
 
 	window.HTMLElement.prototype.setAttribute = new Proxy(window.HTMLElement.prototype.setAttribute, {
   apply(target, thisArg, [name, value]) {

@@ -164,17 +164,22 @@ async function request(req, res, next) {
 			uri = uri.replace('http:/', '')
 			uri = uri.replace('//', '')
 			uri = 'https://' + uri
-	
+      
+	    var url = new URL(uri)
+      
 			//Make A Fetch Request
-	
+	    
 			//Set Headers
-			let headers = {
-				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:74.0) Gecko/20100101 Firefox/74.0"
-			}
+			let headers = req.headers
+      headers.host = url.host
+      headers.origin = url.host
+      headers.refer = url.host
+      
 			let options = {
 				headers: headers,
 				method: req.method
 			}
+      
 			try {
 				let resp = await fetch(uri, options)
 	
@@ -204,10 +209,10 @@ async function request(req, res, next) {
 					html = doc
 				}
 
-				console.log(content)
 				res.set('Content-Type', content)
-	
+	      
 				res.send(html)
+        
 			} catch (e) {
 				var name = e.name
 				var message = e.message
